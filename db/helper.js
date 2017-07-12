@@ -1,15 +1,15 @@
 module.exports = class Helper {
   assignRegion(lat, lng) {
 
-    if ((lat >= 5.4960999 && lat <= 83.9702561) && (lng >= -8.2617199 && lng <= 170.5957)) {
+    if ((lat >= 14.3224 && lat <= 70.9702561) && (lng >= -170.5957 && lng <= -50.26172)) {
       return 'North America';
     }
 
-    else if ((lat >= -56.1455 && lat <= 17.6606999) && (lng >= -110.0281 && lng <= -28.650543)) {
+    else if ((lat >= -56.1455 && lat <= 17.6606999) && (lng >= -92.6038 && lng <= -28.650543)) {
       return 'South America';
     }
 
-    else if ((lat >= 5.4960999 && lat <= 18.4959419) && (lng >= -92.2714 && lng <= -77.158487)) {
+    else if ((lat >= 7.041 && lat <= 18.4959419) && (lng >= -92.2714 && lng <= -77.158487)) {
       return 'Central America';
     }
 
@@ -17,7 +17,7 @@ module.exports = class Helper {
       return 'Africa';
     }
 
-    else if ((lat >= 34.5428 && lat <= 82.1673907) && (lng >= -31.4647999 && lng <= 74.355500)) {
+    else if ((lat >= 34.5428 && lat <= 65.1673907) && (lng >= -11.4647999 && lng <= 55.355500)) {
       return 'Europe';
     }
 
@@ -25,7 +25,7 @@ module.exports = class Helper {
       return 'Middle East';
     }
 
-    else if ((lat >= -12.2118513 && lat <= 81.9661865) && (lng >= -168.97788 && lng <= 25.5886467)) {
+    else if ((lat >= 42.37 && lat <= 81.9661865) && (lng >= 25.97788 && lng <= 175.5886467)) {
       return 'Asia';
     }
 
@@ -66,13 +66,14 @@ module.exports = class Helper {
     }
 
     else {
-      return null;
+      return 'Pacific Ocean';
     }
   }
 
   dataCleaner(array, assignRegion) {
     return array.reduce((acc, quake) => {
       let quakeObj = {
+        id: quake.id,
         magnitude: quake.properties.mag,
         description: quake.properties.place,
         lat: quake.geometry.coordinates[1],
