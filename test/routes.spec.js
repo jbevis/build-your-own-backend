@@ -290,5 +290,69 @@ describe('API Routes', () => {
 
   });
 
+  describe('PATCH /api/v1/:id/newDepth', () => {
+
+    it('should update an earthquake\'s depth', (done) => {
+      const newDepth = { id: 1, newDepth: 3.1459 };
+
+      chai.request(server)
+      .patch('/api/v1/earthquakes/1/updateDepth')
+      .send(newDepth)
+      .end((error, response) => {
+        response.should.have.status(201);
+        response.should.be.json;
+        response.body.should.have.property('message')
+        response.body.message.should.equal('Earthquake depth successfully updated');
+        done();
+      });
+    });
+
+    it('should not update depth if given an invalid parameter', (done) => {
+      const badDepth = { id: 'this should be a number' };
+
+      chai.request(server)
+      .patch('/api/v1/earthquakes/thisshouldfail/updateDepth')
+      .send(badDepth)
+      .end((error, response) => {
+        response.should.have.status(422);
+        response.body.error.should.equal('Expected format: { id: <String>, newDepth: <Decimal>}. You are missing a newDepth property.')
+        done();
+      });
+    });
+
+  });
+
+  describe('PATCH /api/v1/:id/newMag', () => {
+
+    it('should update an earthquake\'s depth', (done) => {
+      const newDepth = { id: 1, newMag: 1000.999 };
+
+      chai.request(server)
+      .patch('/api/v1/earthquakes/1/updateMag')
+      .send(newDepth)
+      .end((error, response) => {
+        response.should.have.status(201);
+        response.should.be.json;
+        response.body.should.have.property('message')
+        response.body.message.should.equal('Earthquake magnitude successfully updated');
+        done();
+      });
+    });
+
+    it('should not update depth if given an invalid parameter', (done) => {
+      const badDepth = { id: 'this should be a number' };
+
+      chai.request(server)
+      .patch('/api/v1/earthquakes/thisshouldfail/updateMag')
+      .send(badDepth)
+      .end((error, response) => {
+        response.should.have.status(422);
+        response.body.error.should.equal('Expected format: { id: <String>, newMag: <Decimal>}. You are missing a newMag property.')
+        done();
+      });
+    });
+
+  });
+
 
 });
