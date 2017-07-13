@@ -71,6 +71,30 @@ app.get('/api/v1/regions/:id', (request, response) => {
 });
 
 app.get('/api/v1/:region_id/earthquakes', (request, response) => {
+  if (request.query.magLow) {
+    let low = parseInt(request.query.magLow);
+    let high = parseInt(request.query.magHi);
+
+    database('earthquakes').where('region_id', request.params.region_id).select()
+    .then(regionQuakes => {
+      regionQuakes.whereBetween('magnitude', [low, high]).select()
+    })
+    .then(earthquakes => {
+      if (earthquakes.length) {
+        response.status(200).json(earthquakes);
+      } else {
+        response.status(404).json({
+          error: 'No earthquakes were found for that magnitude range'
+        });
+      }
+    })
+    .catch(error => {
+      response.status(500).json({
+        error: 'Internal Server Error'
+      })
+    });
+  }
+
   database('earthquakes').where('region_id', request.params.region_id).select()
   .then(earthquakes => {
     if (earthquakes.length) {
@@ -88,14 +112,14 @@ app.get('/api/v1/:region_id/earthquakes', (request, response) => {
   });
 });
 
-// app.get('/api/v1/earthquakes?magnitude=:low&magnitude=:high', (request, response) => {
-//   database('earthquakes').whereBetween('magnitude', [request.params.low, request.params.high]).select()
+// app.get('/api/v1/:magnitude/earthquakes', (request, response) => {
+//   database('earthquakes').where('magnitude', request.params.magnitude).select()
 //   .then(earthquakes => {
 //     if (earthquakes.length) {
 //       response.status(200).json(earthquakes);
 //     } else {
 //       response.status(404).json({
-//         error: 'No earthquakes were found in that magnitude range'
+//         error: 'No earthquakes were found for that magnitude'
 //       });
 //     }
 //   })
@@ -145,6 +169,60 @@ app.post('/api/v1/earthquakes', (request, response) => {
       response.status(500).json({ error })
     })
 });
+
+app.patch('/api/v1/earthquakes/:id/updateDepth', (request, response) => {
+
+  const newDepth = request.body.newDepth;
+  const quakeId = request.params.id;
+  const earthquake = request.body
+
+  for (let requiredParameter of ['id', 'newDepth']) {
+    if (!earthquake[requiredParameter]) {
+      return response.status(422).json({
+        error: `Expected format: { id: <String>, newDepth: <Decimal>}. You are missing a ${requiredParameter} property.`
+      });
+    }
+  }
+
+  database('earthquakes').where('id', quakeId).update('depth', newDepth)
+    .then( earthquake => {
+      response.status(201).json({
+        id: earthquake[0],
+        message: 'Earthquake depth successfully updated'
+      })
+    })
+    .catch(error => {
+      response.status(500).json({ error })
+    })
+});
+
+app.patch('/api/v1/earthquakes/:id/updateMag', (request, response) => {
+
+  const newMag = request.body.newMag;
+  const quakeId = request.params.id;
+  const earthquake = request.body
+
+  for (let requiredParameter of ['id', 'newMag']) {
+    if (!earthquake[requiredParameter]) {
+      return response.status(422).json({
+        error: `Expected format: { id: <String>, newMag: <Decimal>}. You are missing a ${requiredParameter} property.`
+      });
+    }
+  }
+
+  database('earthquakes').where('id', quakeId).update('magnitude', newMag)
+    .then( earthquake => {
+      response.status(201).json({
+        id: earthquake[0],
+        message: 'Earthquake magnitude successfully updated'
+      })
+    })
+    .catch(error => {
+      response.status(500).json({ error })
+    })
+});
+
+
 
 if (!module.parent) {
   app.listen(app.get('port'), () => {
