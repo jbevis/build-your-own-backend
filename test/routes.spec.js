@@ -202,5 +202,93 @@ describe('API Routes', () => {
 
   });
 
+  describe('POST /api/v1/regions', () => {
+
+    it('should insert a new region', (done) => {
+      const regionBody = {
+        id: 3,
+        name: 'Central America',
+        ne_lat: 18.4959419,
+        ne_long: -77.1584879,
+        sw_lat: 7.041,
+        sw_long: -92.2714
+      };
+
+      chai.request(server)
+      .post('/api/v1/regions')
+      .send(regionBody)
+      .end((error, response) => {
+        response.should.have.status(201);
+        response.should.be.json;
+        response.body.should.have.property('id');
+        response.body.id.should.equal(3);
+        done();
+      });
+    });
+
+    it('should not add a new region if missing a parameter', (done) => {
+      const invalidRegion = { name: 'Mexico',
+        lat: 45.99,
+        long: 33.44
+      };
+
+      chai.request(server)
+      .post('/api/v1/regions')
+      .send(invalidRegion)
+      .end((error, response) => {
+        response.should.have.status(422);
+        response.body.error.should.equal('Expected format: { name: <String>, ne_lat: <Decimal>, ne_long: <Decimal>, sw_lat: <Decimal>, sw_long: <Decimal>.}. You are missing a ne_lat property.');
+        done();
+      });
+    });
+
+  });
+
+  describe('POST /api/v1/earthquakes', () => {
+
+    it('should insert a new earthquake', (done) => {
+      const quakeBody = {
+        id: 'us100095vj',
+        magnitude: 6.8,
+        description: 'Test quake',
+        lat: 7.0241,
+        long: -92.88,
+        depth: 20.34,
+        region_id: 2
+      };
+
+      chai.request(server)
+      .post('/api/v1/earthquakes')
+      .send(quakeBody)
+      .end((error, response) => {
+        response.should.have.status(201);
+        response.should.be.json;
+        response.body.should.have.property('id');
+        response.body.id.should.equal('us100095vj');
+        done();
+      });
+    });
+
+    it('should not add a new region if missing a parameter', (done) => {
+      const invalidRegion = { magnitude: 5.0,
+        description: 'invalid quake',
+        lat: 45.99,
+        long: 33.44,
+        depth: 23.33,
+        region_id: 1
+      };
+
+      chai.request(server)
+      .post('/api/v1/earthquakes')
+      .send(invalidRegion)
+      .end((error, response) => {
+        response.should.have.status(422);
+        response.body.error.should.equal('Expected format: { id: <String>, magnitude: <Decimal>, description: <String>, lat: <Decimal>, long: <Decimal>, depth: <Decimal>, region_id: <Integer>}. You are missing a id property.');
+        done();
+      });
+    });
+
+  });
+
 
 });
