@@ -4,8 +4,9 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "mocha ./test/routes.spec.js",
-    "start": "node server.js"
+    "test": "./node_modules/.bin/mocha",
+    "start": "node server.js",
+    "lint": "eslint"
   },
   "keywords": [],
   "author": "",
