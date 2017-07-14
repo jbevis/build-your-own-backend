@@ -1,7 +1,7 @@
 process.env.NODE_ENV = 'testing';
 
 const chai = require('chai');
-const should = chai.should();
+let should = chai.should();
 const chaiHttp = require('chai-http');
 const server = require('../server');
 const knex = require('../db/knex.js');
@@ -75,7 +75,7 @@ describe('API Routes', () => {
       .end((error, response) => {
 
         response.should.have.status(404);
-        done()
+        done();
       });
     });
   });
@@ -114,7 +114,7 @@ describe('API Routes', () => {
       .end((error, response) => {
 
         response.should.have.status(404);
-        done()
+        done();
       });
     });
 
@@ -339,7 +339,7 @@ describe('API Routes', () => {
       .end((error, response) => {
         response.should.have.status(201);
         response.should.be.json;
-        response.body.should.have.property('message')
+        response.body.should.have.property('message');
         response.body.message.should.equal('Earthquake depth successfully updated.');
         done();
       });
@@ -353,7 +353,7 @@ describe('API Routes', () => {
       .send(badDepth)
       .end((error, response) => {
         response.should.have.status(422);
-        response.body.error.should.equal('Expected format: { id: <String>, newDepth: <Decimal>}. You are missing a newDepth property.')
+        response.body.error.should.equal('Expected format: { id: <String>, newDepth: <Decimal>}. You are missing a newDepth property.');
         done();
       });
     });
@@ -371,7 +371,7 @@ describe('API Routes', () => {
       .end((error, response) => {
         response.should.have.status(201);
         response.should.be.json;
-        response.body.should.have.property('message')
+        response.body.should.have.property('message');
         response.body.message.should.equal('Earthquake magnitude successfully updated.');
         done();
       });
@@ -385,7 +385,7 @@ describe('API Routes', () => {
       .send(badDepth)
       .end((error, response) => {
         response.should.have.status(422);
-        response.body.error.should.equal('Expected format: { id: <String>, newMag: <Decimal>}. You are missing a newMag property.')
+        response.body.error.should.equal('Expected format: { id: <String>, newMag: <Decimal>}. You are missing a newMag property.');
         done();
       });
     });
@@ -402,7 +402,7 @@ describe('API Routes', () => {
         response.should.have.status(200);
         response.should.be.json;
         response.body.message.should.equal('Earthquake with id of 2 successfully deleted.');
-        done()
+        done();
       });
     });
 
@@ -414,7 +414,7 @@ describe('API Routes', () => {
         response.should.have.status(404);
         response.should.be.json;
         response.body.error.should.equal('Earthquake with id of 500 was not found.');
-        done()
+        done();
       });
     });
 
@@ -436,8 +436,8 @@ describe('API Routes', () => {
           response.should.have.status(404);
           response.should.be.json;
           response.body.error.should.equal('No region was found matching that id.');
-          done()
-        })
+          done();
+        });
       });
     });
 
@@ -449,7 +449,7 @@ describe('API Routes', () => {
         response.should.have.status(404);
         response.should.be.json;
         response.body.error.should.equal('No earthquakes with a region_id of 400 were found.');
-        done()
+        done();
       });
     });
 
