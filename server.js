@@ -17,7 +17,7 @@ if ( !process.env.JWT_SECRET || !process.env.USERNAME || !process.env.PASSWORD )
   throw 'Make sure you have a JWT_SECRET, USERNAME, and PASSWORD in your .env file';
 }
 
-app.set('secretKey', config.JWT_SECRET);
+app.set('secretKey', process.env.JWT_SECRET);
 
 const checkAuthorization = (request, response, next) => {
 
