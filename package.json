@@ -6,7 +6,7 @@
   "scripts": {
     "test": "./node_modules/.bin/mocha",
     "start": "node server.js",
-    "lint": "jshint"
+    "lint": "jshint ."
   },
   "repository": {
     "type": "git",
@@ -33,6 +33,7 @@
     "mocha": "^3.4.2"
   },
   "pre-commit": [
-    "lint"
+    "lint",
+    "test"
   ]
 }

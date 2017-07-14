@@ -80,10 +80,10 @@ module.exports = class Helper {
         long: quake.geometry.coordinates[0],
         depth: quake.geometry.coordinates[2],
         region: assignRegion(quake.geometry.coordinates[1], quake.geometry.coordinates[0])
-      }
+      };
 
-      acc.push(quakeObj)
-      return acc
+      acc.push(quakeObj);
+      return acc;
     }, []);
   }
 };

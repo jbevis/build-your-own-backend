@@ -44,4 +44,4 @@ module.exports = [
     depth: 0.5,
     region: 'North America'
   },
-]
+];

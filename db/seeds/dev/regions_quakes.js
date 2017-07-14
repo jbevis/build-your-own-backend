@@ -73,7 +73,7 @@ const assignRegion = (lat, lng) => {
   else {
     return 'Pacific Ocean';
   }
-}
+};
 
 const dataCleaner = (array, assignRegion) => {
   return array.reduce((acc, quake) => {
@@ -85,12 +85,12 @@ const dataCleaner = (array, assignRegion) => {
       long: quake.geometry.coordinates[0],
       depth: quake.geometry.coordinates[2],
       region: assignRegion(quake.geometry.coordinates[1], quake.geometry.coordinates[0])
-    }
+    };
 
-    acc.push(quakeObj)
-    return acc
+    acc.push(quakeObj);
+    return acc;
   }, []);
-}
+};
 
 const cleanedQuakes = dataCleaner(quakesData.features, assignRegion);
 
@@ -111,7 +111,7 @@ exports.seed = function(knex, Promise) {
       quakesPromise.push(createQuake(knex, quake, region));
     });
 
-    return Promise.all(quakesPromise)
+    return Promise.all(quakesPromise);
   });
 };
 

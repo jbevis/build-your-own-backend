@@ -19,7 +19,7 @@ exports.seed = function(knex, Promise) {
       quakesPromise.push(createQuake(knex, quake, region));
     });
 
-    return Promise.all(quakesPromise)
+    return Promise.all(quakesPromise);
   });
 };
 

@@ -127,4 +127,4 @@ module.exports = [
     sw_lat: -68.4421138,
     sw_long: -160.2500533
   }
-]
+];
