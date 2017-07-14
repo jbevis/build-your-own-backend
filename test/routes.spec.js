@@ -152,7 +152,7 @@ describe('API Routes', () => {
 
         response.should.have.status(404);
         response.should.be.json;
-        response.body.error.should.equal('No region was found matching that id');
+        response.body.error.should.equal('No region was found matching that id.');
         done();
       });
     });
@@ -195,7 +195,45 @@ describe('API Routes', () => {
 
         response.should.have.status(404);
         response.should.be.json;
-        response.body.error.should.equal('No earthquakes were found for that region');
+        response.body.error.should.equal('No earthquakes were found for that region.');
+        done();
+      });
+    });
+
+  });
+
+  describe('GET /api/v1/earthquakes/filterMag', () => {
+
+    it('should return all earthquakes within a given magnitude level range', (done) => {
+      chai.request(server)
+      .get('/api/v1/earthquakes/filterMag?magLow=4.5&magHi=8.0')
+      .end((error, response) => {
+        const sortedBody = response.body.sort((a, b) => a.id - b.id);
+
+        response.should.have.status(200);
+        response.should.be.json;
+        sortedBody.length.should.equal(2);
+        sortedBody[0].should.have.property('id');
+        sortedBody[0].should.have.property('magnitude');
+        sortedBody[0].should.have.property('description');
+        sortedBody[0].should.have.property('lat');
+        sortedBody[0].should.have.property('long');
+        sortedBody[0].should.have.property('depth');
+        sortedBody[0].should.have.property('region_id');
+        sortedBody[0].magnitude.should.equal('4.50');
+        sortedBody[1].magnitude.should.equal('6.50');
+        done();
+      });
+    });
+
+    it('should return a 404 if passed a region with no earthquakes to it', (done) => {
+      chai.request(server)
+      .get('/api/v1/earthquakes/filterMag?magLo=10&magHi=100')
+      .end((error, response) => {
+
+        response.should.have.status(404);
+        response.should.be.json;
+        response.body.error.should.equal('No earthquakes were found for that magnitude range.');
         done();
       });
     });
@@ -302,7 +340,7 @@ describe('API Routes', () => {
         response.should.have.status(201);
         response.should.be.json;
         response.body.should.have.property('message')
-        response.body.message.should.equal('Earthquake depth successfully updated');
+        response.body.message.should.equal('Earthquake depth successfully updated.');
         done();
       });
     });
@@ -334,7 +372,7 @@ describe('API Routes', () => {
         response.should.have.status(201);
         response.should.be.json;
         response.body.should.have.property('message')
-        response.body.message.should.equal('Earthquake magnitude successfully updated');
+        response.body.message.should.equal('Earthquake magnitude successfully updated.');
         done();
       });
     });
@@ -354,5 +392,66 @@ describe('API Routes', () => {
 
   });
 
+  describe('DELETE /api/v1/:id/earthquakes', () => {
 
+    it('should remove a specific row from the earthquakes table', (done) => {
+
+      chai.request(server)
+      .delete('/api/v1/2/earthquakes')
+      .end((error, response) => {
+        response.should.have.status(200);
+        response.should.be.json;
+        response.body.message.should.equal('Earthquake with id of 2 successfully deleted.');
+        done()
+      });
+    });
+
+    it('should return error for an earthquake delete request does not exist', (done) => {
+
+      chai.request(server)
+      .delete('/api/v1/500/earthquakes')
+      .end((error, response) => {
+        response.should.have.status(404);
+        response.should.be.json;
+        response.body.error.should.equal('Earthquake with id of 500 was not found.');
+        done()
+      });
+    });
+
+  });
+
+  describe('DELETE /api/v1/:id/regions', () => {
+
+    it('should delete a region and associated data from all tables', (done) => {
+
+      chai.request(server)
+      .delete('/api/v1/1/regions')
+      .end((error, response) => {
+        response.should.have.status(200);
+        response.should.be.json;
+        response.body.message.should.equal('All earthquakes with region_id of 1 have been deleted successfully.');
+        chai.request(server)
+        .get('/api/v1/regions/1')
+        .end((error, response) => {
+          response.should.have.status(404);
+          response.should.be.json;
+          response.body.error.should.equal('No region was found matching that id.');
+          done()
+        })
+      });
+    });
+
+    it('should not delete a region is given a non existent id', (done) => {
+
+      chai.request(server)
+      .delete('/api/v1/400/regions')
+      .end((error, response) => {
+        response.should.have.status(404);
+        response.should.be.json;
+        response.body.error.should.equal('No earthquakes with a region_id of 400 were found.');
+        done()
+      });
+    });
+
+  });
 });
