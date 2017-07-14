@@ -5,7 +5,7 @@ let should = chai.should();
 const chaiHttp = require('chai-http');
 const server = require('../server');
 const knex = require('../db/knex.js');
-const token = require('../db/token.js');
+const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImVhcnRocXVha2UiLCJwYXNzd29yZCI6InNoYWtlIiwiaWF0IjoxNTAwMDE5NzI4LCJleHAiOjE1MDAzNjUzMjh9.C_pmCkBSYI8vNFrc2Dvx11fWlTDKEwEXyIV2OwT6ySk';
 
 
 chai.use(chaiHttp);
