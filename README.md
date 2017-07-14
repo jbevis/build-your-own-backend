@@ -48,9 +48,9 @@ This is a project for the Turing School's Front End Engineering program in Mod 4
    - Request must be sent with body including ID, NAME, NE_LAT, NE_LONG, SW_LAT, SW_long
 
  * /api/v1/earthquakes
-  - Creates a new earthquake in the earthquakes table
-  - Requires authentication with a JWT
-  - Request must be sent with a body including ID, MAGNITUDE, DESCRIPTION, LAT, LONG, DEPTH, region_id
+    - Creates a new earthquake in the earthquakes table
+    - Requires authentication with a JWT
+    - Request must be sent with a body including ID, MAGNITUDE, DESCRIPTION, LAT, LONG, DEPTH, region_id
 
 #### PATCH:
 
