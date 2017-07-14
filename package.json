@@ -12,10 +12,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.17.2",
     "cors": "^2.8.4",
     "csvtojson": "^1.1.7",
     "dotenv": "^4.0.0",
-    "expres": "0.0.5",
     "express": "^4.15.3",
     "jsonwebtoken": "^7.4.1",
     "knex": "^0.13.0",
