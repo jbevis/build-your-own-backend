@@ -5,6 +5,7 @@ let should = chai.should();
 const chaiHttp = require('chai-http');
 const server = require('../server');
 const knex = require('../db/knex.js');
+const token = require('../db/token.js');
 
 
 chai.use(chaiHttp);
@@ -240,6 +241,45 @@ describe('API Routes', () => {
 
   });
 
+  describe('POST /api/v1/authenticate', () => {
+
+    it('should return a token and success message when given authorized body', (done) => {
+
+      chai.request(server)
+      .post('/api/v1/authenticate')
+      .send({
+        username: 'earthquake',
+        password: 'shake',
+        token
+      })
+      .end((error, response) => {
+        response.should.have.status(200);
+        response.should.be.json;
+        response.body.username.should.equal('earthquake');
+        response.body.token.should.have.length(447);
+        done();
+      });
+    });
+
+    it('should return an error if passed an invalid username or password', (done) => {
+
+      chai.request(server)
+      .post('/api/v1/authenticate')
+      .send({
+        username: 'asdfasdf',
+        password: 'thiswontwork',
+        token
+      })
+      .end((error, response) => {
+        response.should.have.status(403);
+        response.should.be.json;
+        response.body.message.should.equal('Invalid Credentials');
+        done();
+      });
+    });
+
+  });
+
   describe('POST /api/v1/regions', () => {
 
     it('should insert a new region', (done) => {
@@ -249,12 +289,12 @@ describe('API Routes', () => {
         ne_lat: 18.4959419,
         ne_long: -77.1584879,
         sw_lat: 7.041,
-        sw_long: -92.2714
+        sw_long: -92.2714,
       };
 
       chai.request(server)
       .post('/api/v1/regions')
-      .send(regionBody)
+      .send({regionBody, token})
       .end((error, response) => {
         response.should.have.status(201);
         response.should.be.json;
@@ -272,10 +312,10 @@ describe('API Routes', () => {
 
       chai.request(server)
       .post('/api/v1/regions')
-      .send(invalidRegion)
+      .send(invalidRegion, token)
       .end((error, response) => {
-        response.should.have.status(422);
-        response.body.error.should.equal('Expected format: { name: <String>, ne_lat: <Decimal>, ne_long: <Decimal>, sw_lat: <Decimal>, sw_long: <Decimal>.}. You are missing a ne_lat property.');
+        response.should.have.status(403);
+        response.body.message.should.equal('You must be authorized to hit this endpoint');
         done();
       });
     });
@@ -297,7 +337,7 @@ describe('API Routes', () => {
 
       chai.request(server)
       .post('/api/v1/earthquakes')
-      .send(quakeBody)
+      .send({quakeBody, token})
       .end((error, response) => {
         response.should.have.status(201);
         response.should.be.json;
@@ -318,24 +358,24 @@ describe('API Routes', () => {
 
       chai.request(server)
       .post('/api/v1/earthquakes')
-      .send(invalidRegion)
+      .send(invalidRegion, token)
       .end((error, response) => {
-        response.should.have.status(422);
-        response.body.error.should.equal('Expected format: { id: <String>, magnitude: <Decimal>, description: <String>, lat: <Decimal>, long: <Decimal>, depth: <Decimal>, region_id: <Integer>}. You are missing a id property.');
+        response.should.have.status(403);
+        response.body.message.should.equal('You must be authorized to hit this endpoint');
         done();
       });
     });
 
   });
 
-  describe('PATCH /api/v1/:id/newDepth', () => {
+  describe('PATCH /api/v1/earthquakes/:id/updateDepth', () => {
 
     it('should update an earthquake\'s depth', (done) => {
       const newDepth = { id: 1, newDepth: 3.1459 };
 
       chai.request(server)
       .patch('/api/v1/earthquakes/1/updateDepth')
-      .send(newDepth)
+      .send({newDepth, token})
       .end((error, response) => {
         response.should.have.status(201);
         response.should.be.json;
@@ -350,10 +390,10 @@ describe('API Routes', () => {
 
       chai.request(server)
       .patch('/api/v1/earthquakes/thisshouldfail/updateDepth')
-      .send(badDepth)
+      .send(badDepth, token)
       .end((error, response) => {
-        response.should.have.status(422);
-        response.body.error.should.equal('Expected format: { id: <String>, newDepth: <Decimal>}. You are missing a newDepth property.');
+        response.should.have.status(403);
+        response.body.message.should.equal('You must be authorized to hit this endpoint');
         done();
       });
     });
@@ -362,12 +402,12 @@ describe('API Routes', () => {
 
   describe('PATCH /api/v1/:id/newMag', () => {
 
-    it('should update an earthquake\'s depth', (done) => {
-      const newDepth = { id: 1, newMag: 1000.999 };
+    it('should update an earthquake\'s magnitude', (done) => {
+      const newMag = { id: 1, newMag: 1000.999 };
 
       chai.request(server)
       .patch('/api/v1/earthquakes/1/updateMag')
-      .send(newDepth)
+      .send({newMag, token})
       .end((error, response) => {
         response.should.have.status(201);
         response.should.be.json;
@@ -382,10 +422,10 @@ describe('API Routes', () => {
 
       chai.request(server)
       .patch('/api/v1/earthquakes/thisshouldfail/updateMag')
-      .send(badDepth)
+      .send(badDepth, token)
       .end((error, response) => {
-        response.should.have.status(422);
-        response.body.error.should.equal('Expected format: { id: <String>, newMag: <Decimal>}. You are missing a newMag property.');
+        response.should.have.status(403);
+        response.body.message.should.equal('You must be authorized to hit this endpoint');
         done();
       });
     });
@@ -398,6 +438,7 @@ describe('API Routes', () => {
 
       chai.request(server)
       .delete('/api/v1/2/earthquakes')
+      .send({token})
       .end((error, response) => {
         response.should.have.status(200);
         response.should.be.json;
@@ -410,6 +451,7 @@ describe('API Routes', () => {
 
       chai.request(server)
       .delete('/api/v1/500/earthquakes')
+      .send({token})
       .end((error, response) => {
         response.should.have.status(404);
         response.should.be.json;
@@ -426,6 +468,7 @@ describe('API Routes', () => {
 
       chai.request(server)
       .delete('/api/v1/1/regions')
+      .send({token})
       .end((error, response) => {
         response.should.have.status(200);
         response.should.be.json;
@@ -445,6 +488,7 @@ describe('API Routes', () => {
 
       chai.request(server)
       .delete('/api/v1/400/regions')
+      .send({token})
       .end((error, response) => {
         response.should.have.status(404);
         response.should.be.json;
