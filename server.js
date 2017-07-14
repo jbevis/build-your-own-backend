@@ -23,13 +23,13 @@ app.get('/api/v1/regions', (request, response) => {
       response.status(200).json(regions);
     } else {
       response.status(404).json({
-        error: 'No regions were found'
+        error: 'No regions were found.'
       });
     }
   })
   .catch(error => {
     response.status(500).json({
-      error: 'Internal Servor Error'
+      error: 'Internal Servor Error.'
     })
   });
 });
@@ -41,7 +41,7 @@ app.get('/api/v1/earthquakes', (request, response) => {
       response.status(200).json(earthquakes);
     } else {
       response.status(404).json({
-        error: 'No earthquakes were found'
+        error: 'No earthquakes were found.'
       });
     }
   })
@@ -59,7 +59,7 @@ app.get('/api/v1/regions/:id', (request, response) => {
       response.status(200).json(region);
     } else {
       response.status(404).json({
-        error: 'No region was found matching that id'
+        error: 'No region was found matching that id.'
       });
     }
   })
@@ -71,37 +71,13 @@ app.get('/api/v1/regions/:id', (request, response) => {
 });
 
 app.get('/api/v1/:region_id/earthquakes', (request, response) => {
-  if (request.query.magLow) {
-    let low = parseInt(request.query.magLow);
-    let high = parseInt(request.query.magHi);
-
-    database('earthquakes').where('region_id', request.params.region_id).select()
-    .then(regionQuakes => {
-      regionQuakes.whereBetween('magnitude', [low, high]).select()
-    })
-    .then(earthquakes => {
-      if (earthquakes.length) {
-        response.status(200).json(earthquakes);
-      } else {
-        response.status(404).json({
-          error: 'No earthquakes were found for that magnitude range'
-        });
-      }
-    })
-    .catch(error => {
-      response.status(500).json({
-        error: 'Internal Server Error'
-      })
-    });
-  }
-
   database('earthquakes').where('region_id', request.params.region_id).select()
   .then(earthquakes => {
     if (earthquakes.length) {
       response.status(200).json(earthquakes);
     } else {
       response.status(404).json({
-        error: 'No earthquakes were found for that region'
+        error: 'No earthquakes were found for that region.'
       });
     }
   })
@@ -112,23 +88,25 @@ app.get('/api/v1/:region_id/earthquakes', (request, response) => {
   });
 });
 
-// app.get('/api/v1/:magnitude/earthquakes', (request, response) => {
-//   database('earthquakes').where('magnitude', request.params.magnitude).select()
-//   .then(earthquakes => {
-//     if (earthquakes.length) {
-//       response.status(200).json(earthquakes);
-//     } else {
-//       response.status(404).json({
-//         error: 'No earthquakes were found for that magnitude'
-//       });
-//     }
-//   })
-//   .catch(error => {
-//     response.status(500).json({
-//       error: 'Internal Server Error'
-//     })
-//   });
-// });
+app.get('/api/v1/earthquakes/filterMag', (request, response) => {
+
+  const low = parseFloat(request.query.magLow);
+  const high = parseFloat(request.query.magHi);
+
+  database('earthquakes').whereBetween('magnitude', [low, high]).select()
+  .then(earthquakes => {
+    if (earthquakes.length) {
+      response.status(200).json(earthquakes);
+    } else {
+      response.status(404).json({
+        error: 'No earthquakes were found for that magnitude range.'
+      });
+    }
+  })
+  .catch(error => {
+    response.status(500).json({ error })
+  });
+});
 
 app.post('/api/v1/regions', (request, response) => {
   const region = request.body;
@@ -146,8 +124,10 @@ app.post('/api/v1/regions', (request, response) => {
       response.status(201).json({ id: region[0] })
     })
     .catch(error => {
-      response.status(500).json({ error })
-    })
+      response.status(500).json({
+        error: 'Internal server error.'
+      })
+    });
 });
 
 app.post('/api/v1/earthquakes', (request, response) => {
@@ -166,8 +146,10 @@ app.post('/api/v1/earthquakes', (request, response) => {
       response.status(201).json({ id: earthquake[0] })
     })
     .catch(error => {
-      response.status(500).json({ error })
-    })
+      response.status(500).json({
+        error: 'Internal server error.'
+      })
+    });
 });
 
 app.patch('/api/v1/earthquakes/:id/updateDepth', (request, response) => {
@@ -185,15 +167,17 @@ app.patch('/api/v1/earthquakes/:id/updateDepth', (request, response) => {
   }
 
   database('earthquakes').where('id', quakeId).update('depth', newDepth)
-    .then( earthquake => {
+    .then(earthquake => {
       response.status(201).json({
         id: earthquake[0],
-        message: 'Earthquake depth successfully updated'
+        message: 'Earthquake depth successfully updated.'
       })
     })
     .catch(error => {
-      response.status(500).json({ error })
-    })
+      response.status(500).json({
+        error: 'Internal server error.'
+      })
+    });
 });
 
 app.patch('/api/v1/earthquakes/:id/updateMag', (request, response) => {
@@ -214,15 +198,74 @@ app.patch('/api/v1/earthquakes/:id/updateMag', (request, response) => {
     .then( earthquake => {
       response.status(201).json({
         id: earthquake[0],
-        message: 'Earthquake magnitude successfully updated'
+        message: 'Earthquake magnitude successfully updated.'
       })
     })
     .catch(error => {
-      response.status(500).json({ error })
-    })
+      response.status(500).json({
+        error: 'Internal server error.'
+      })
+    });
 });
 
+app.delete('/api/v1/:id/earthquakes', (request, response) => {
 
+  database('earthquakes').where('id', request.params.id).del()
+  .then(result => {
+    if (result === 1) {
+      response.status(200).json({
+        message: `Earthquake with id of ${request.params.id} successfully deleted.`
+      })
+    } else {
+      response.status(404).json({
+        error: `Earthquake with id of ${request.params.id} was not found.`
+      })
+    }
+  })
+  .catch(error => {
+    response.status(500).json({
+      error: 'Internal server error.'
+    })
+  })
+});
+
+app.delete('/api/v1/:id/regions', (request, response) => {
+
+  database('earthquakes').where('region_id', request.params.id).del()
+  .then(result => {
+    if (result >= 1) {
+      response.status(200).json({
+        message: `All earthquakes with region_id of ${request.params.id} have been deleted successfully.`
+      })
+    } else {
+      response.status(404).json({
+        error: `No earthquakes with a region_id of ${request.params.id} were found.`
+      })
+    }
+  })
+  .catch(error => {
+    response.status(500).json({
+      error: 'Internal server error'
+    })
+  })
+  database('regions').where('id', request.params.id).del()
+  .then(result => {
+    if (result === 1) {
+      response.status(200).json({
+        message: `Region with an id of ${request.params.id} has been deleted successfully.`
+      })
+    } else {
+      response.status(404).json({
+        error: `No region with an id of ${request.params.id} was found.`
+      })
+    }
+  })
+  .catch(error => {
+    response.status(500).json({
+      error: 'Internal server error'
+    })
+  })
+});
 
 if (!module.parent) {
   app.listen(app.get('port'), () => {
