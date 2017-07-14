@@ -1,16 +1,52 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
-
 const environment = process.env.NODE_ENV || 'development';
+const jwt = require('jsonwebtoken');
+const config = require('dotenv').config().parsed;
 const configuration = require('./knexfile')[environment];
 const database = require('knex')(configuration);
-
-app.set('port', process.env.PORT || 3000);
+const cors = require('cors');
 
 app.use(express.static(`${__dirname}/public`));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors());
+
+if ( !process.env.JWT_SECRET || !process.env.USERNAME || !process.env.PASSWORD ) {
+  throw 'Make sure you have a JWT_SECRET, USERNAME, and PASSWORD in your .env file';
+}
+
+app.set('secretKey', config.JWT_SECRET);
+
+const checkAuthorization = (request, response, next) => {
+
+  const token = request.body.token ||
+                request.param('token') ||
+                request.headers.authorization;
+
+  if (token) {
+    jwt.verify(token, app.get('secretKey'), (error, decoded) => {
+
+      if (error) {
+        return response.status(403).send({
+          success: false,
+          message: 'Invalid authorization token.'
+        });
+      } else {
+        request.decoded = decoded;
+        next();
+      }
+    });
+  } else {
+    return response.status(403).send({
+      success: false,
+      message: 'You must be authorized to hit this endpoint'
+    });
+  }
+};
+
+app.set('port', process.env.PORT || 3000);
 
 app.get('/', (request, response) => {
   response.sendFile('index.html');
@@ -108,8 +144,32 @@ app.get('/api/v1/earthquakes/filterMag', (request, response) => {
   });
 });
 
-app.post('/api/v1/regions', (request, response) => {
-  const region = request.body;
+app.post('/api/v1/authenticate', (request, response) => {
+  const userInfo = request.body;
+  const username = process.env.USERNAME || config.USERNAME;
+  const password = process.env.PASSWORD || config.PASSWORD;
+
+  if (userInfo.username !== username ||  userInfo.password !== password) {
+    response.status(403).send({
+      success: false,
+      message: 'Invalid Credentials'
+    });
+  } else {
+    let token = jwt.sign(userInfo, app.get('secretKey'), {
+      expiresIn: 345600
+    });
+
+    response.json({
+      success: true,
+      username: userInfo.username,
+      token
+    });
+  }
+});
+
+app.post('/api/v1/regions', checkAuthorization, (request, response) => {
+  const region = request.body.regionBody;
+  // console.log(region);
 
   for (let requiredParameter of ['name', 'ne_lat', 'ne_long', 'sw_lat', 'sw_long']) {
     if (!region[requiredParameter]) {
@@ -130,8 +190,8 @@ app.post('/api/v1/regions', (request, response) => {
     });
 });
 
-app.post('/api/v1/earthquakes', (request, response) => {
-  const earthquake = request.body;
+app.post('/api/v1/earthquakes', checkAuthorization, (request, response) => {
+  const earthquake = request.body.quakeBody;
 
   for (let requiredParameter of ['id', 'magnitude', 'description', 'lat', 'long', 'depth', 'region_id']) {
     if (!earthquake[requiredParameter]) {
@@ -152,11 +212,11 @@ app.post('/api/v1/earthquakes', (request, response) => {
     });
 });
 
-app.patch('/api/v1/earthquakes/:id/updateDepth', (request, response) => {
+app.patch('/api/v1/earthquakes/:id/updateDepth', checkAuthorization, (request, response) => {
 
-  const newDepth = request.body.newDepth;
+  const earthquake = request.body.newDepth;
   const quakeId = request.params.id;
-  const earthquake = request.body;
+  const newDepth = request.body.newDepth.newDepth;
 
   for (let requiredParameter of ['id', 'newDepth']) {
     if (!earthquake[requiredParameter]) {
@@ -166,7 +226,7 @@ app.patch('/api/v1/earthquakes/:id/updateDepth', (request, response) => {
     }
   }
 
-  database('earthquakes').where('id', quakeId).update('depth', newDepth)
+  database('earthquakes').where('id', quakeId).update('depth', earthquake.newDepth)
     .then(earthquake => {
       response.status(201).json({
         id: earthquake[0],
@@ -180,11 +240,11 @@ app.patch('/api/v1/earthquakes/:id/updateDepth', (request, response) => {
     });
 });
 
-app.patch('/api/v1/earthquakes/:id/updateMag', (request, response) => {
+app.patch('/api/v1/earthquakes/:id/updateMag', checkAuthorization, (request, response) => {
 
-  const newMag = request.body.newMag;
+  const newMag = request.body.newMag.newMag;
   const quakeId = request.params.id;
-  const earthquake = request.body;
+  const earthquake = request.body.newMag;
 
   for (let requiredParameter of ['id', 'newMag']) {
     if (!earthquake[requiredParameter]) {
@@ -208,7 +268,7 @@ app.patch('/api/v1/earthquakes/:id/updateMag', (request, response) => {
     });
 });
 
-app.delete('/api/v1/:id/earthquakes', (request, response) => {
+app.delete('/api/v1/:id/earthquakes', checkAuthorization, (request, response) => {
 
   database('earthquakes').where('id', request.params.id).del()
   .then(result => {
@@ -229,7 +289,7 @@ app.delete('/api/v1/:id/earthquakes', (request, response) => {
   });
 });
 
-app.delete('/api/v1/:id/regions', (request, response) => {
+app.delete('/api/v1/:id/regions', checkAuthorization, (request, response) => {
 
   database('earthquakes').where('region_id', request.params.id).del()
   .then(result => {
@@ -256,7 +316,7 @@ app.delete('/api/v1/:id/regions', (request, response) => {
       });
     } else {
       response.status(404).json({
-        error: `No region with an id of ${request.params.id} was found.`
+        error: `No earthquakes with a region_id of ${request.params.id} were found.`
       });
     }
   })
