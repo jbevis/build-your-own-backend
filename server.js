@@ -8,12 +8,12 @@ const database = require('knex')(configuration);
 
 app.set('port', process.env.PORT || 3000);
 
-app.use(express.static(`${__dirname}/public`))
+app.use(express.static(`${__dirname}/public`));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get('/', (request, response) => {
-  response.sendFile('index.html')
+  response.sendFile('index.html');
 });
 
 app.get('/api/v1/regions', (request, response) => {
@@ -30,7 +30,7 @@ app.get('/api/v1/regions', (request, response) => {
   .catch(error => {
     response.status(500).json({
       error: 'Internal Servor Error.'
-    })
+    });
   });
 });
 
@@ -48,7 +48,7 @@ app.get('/api/v1/earthquakes', (request, response) => {
   .catch(error => {
     response.status(500).json({
       error: 'Internal Servor Error'
-    })
+    });
   });
 });
 
@@ -66,7 +66,7 @@ app.get('/api/v1/regions/:id', (request, response) => {
   .catch(error => {
     response.status(500).json({
       error: 'Internal Servor Error'
-    })
+    });
   });
 });
 
@@ -84,7 +84,7 @@ app.get('/api/v1/:region_id/earthquakes', (request, response) => {
   .catch(error => {
     response.status(500).json({
       error: 'Internal Server Error'
-    })
+    });
   });
 });
 
@@ -104,7 +104,7 @@ app.get('/api/v1/earthquakes/filterMag', (request, response) => {
     }
   })
   .catch(error => {
-    response.status(500).json({ error })
+    response.status(500).json({ error });
   });
 });
 
@@ -121,12 +121,12 @@ app.post('/api/v1/regions', (request, response) => {
 
   database('regions').insert(region, 'id')
     .then(region => {
-      response.status(201).json({ id: region[0] })
+      response.status(201).json({ id: region[0] });
     })
     .catch(error => {
       response.status(500).json({
         error: 'Internal server error.'
-      })
+      });
     });
 });
 
@@ -143,12 +143,12 @@ app.post('/api/v1/earthquakes', (request, response) => {
 
   database('earthquakes').insert(earthquake, 'id')
     .then(earthquake => {
-      response.status(201).json({ id: earthquake[0] })
+      response.status(201).json({ id: earthquake[0] });
     })
     .catch(error => {
       response.status(500).json({
         error: 'Internal server error.'
-      })
+      });
     });
 });
 
@@ -156,7 +156,7 @@ app.patch('/api/v1/earthquakes/:id/updateDepth', (request, response) => {
 
   const newDepth = request.body.newDepth;
   const quakeId = request.params.id;
-  const earthquake = request.body
+  const earthquake = request.body;
 
   for (let requiredParameter of ['id', 'newDepth']) {
     if (!earthquake[requiredParameter]) {
@@ -171,12 +171,12 @@ app.patch('/api/v1/earthquakes/:id/updateDepth', (request, response) => {
       response.status(201).json({
         id: earthquake[0],
         message: 'Earthquake depth successfully updated.'
-      })
+      });
     })
     .catch(error => {
       response.status(500).json({
         error: 'Internal server error.'
-      })
+      });
     });
 });
 
@@ -184,7 +184,7 @@ app.patch('/api/v1/earthquakes/:id/updateMag', (request, response) => {
 
   const newMag = request.body.newMag;
   const quakeId = request.params.id;
-  const earthquake = request.body
+  const earthquake = request.body;
 
   for (let requiredParameter of ['id', 'newMag']) {
     if (!earthquake[requiredParameter]) {
@@ -199,12 +199,12 @@ app.patch('/api/v1/earthquakes/:id/updateMag', (request, response) => {
       response.status(201).json({
         id: earthquake[0],
         message: 'Earthquake magnitude successfully updated.'
-      })
+      });
     })
     .catch(error => {
       response.status(500).json({
         error: 'Internal server error.'
-      })
+      });
     });
 });
 
@@ -215,18 +215,18 @@ app.delete('/api/v1/:id/earthquakes', (request, response) => {
     if (result === 1) {
       response.status(200).json({
         message: `Earthquake with id of ${request.params.id} successfully deleted.`
-      })
+      });
     } else {
       response.status(404).json({
         error: `Earthquake with id of ${request.params.id} was not found.`
-      })
+      });
     }
   })
   .catch(error => {
     response.status(500).json({
       error: 'Internal server error.'
-    })
-  })
+    });
+  });
 });
 
 app.delete('/api/v1/:id/regions', (request, response) => {
@@ -236,41 +236,40 @@ app.delete('/api/v1/:id/regions', (request, response) => {
     if (result >= 1) {
       response.status(200).json({
         message: `All earthquakes with region_id of ${request.params.id} have been deleted successfully.`
-      })
+      });
     } else {
       response.status(404).json({
         error: `No earthquakes with a region_id of ${request.params.id} were found.`
-      })
+      });
     }
   })
   .catch(error => {
     response.status(500).json({
       error: 'Internal server error'
-    })
-  })
+    });
+  });
   database('regions').where('id', request.params.id).del()
   .then(result => {
     if (result === 1) {
       response.status(200).json({
         message: `Region with an id of ${request.params.id} has been deleted successfully.`
-      })
+      });
     } else {
       response.status(404).json({
         error: `No region with an id of ${request.params.id} was found.`
-      })
+      });
     }
   })
   .catch(error => {
     response.status(500).json({
       error: 'Internal server error'
-    })
-  })
+    });
+  });
 });
 
 if (!module.parent) {
   app.listen(app.get('port'), () => {
-    console.log(`Server is running on port ${app.get('port')}`);
-  })
+  });
 }
 
 module.exports = app;
