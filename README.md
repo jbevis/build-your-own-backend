@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/jbevis/build-your-own-backend/tree/master.svg?style=svg)](https://circleci.com/gh/jbevis/build-your-own-backend/tree/master)
+
 ### Build Your Own Backend
 
 #### About
