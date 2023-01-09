@@ -24,7 +24,7 @@
     "jetfuel-validate": "git+https://github.com/jbevis/jetfuel-validate.git",
     "jshint": "^2.9.5",
     "jsonwebtoken": "^7.4.1",
-    "knex": "^0.13.0",
+    "knex": "^2.4.0",
     "pg": "^6.4.0"
   },
   "devDependencies": {
